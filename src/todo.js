@@ -1,13 +1,14 @@
 export default function toDos(){
     class toDo {
         
-        constructor(title, description, dueDate, priority) {
+        constructor(title, description, dueDate, priority, project = 'defaultProject') {
             this.title = title,
             this.description = description,
             this.dueDate = dueDate,
             this.priority = priority,
-            this._status = 'incomplete',
-            this._project = null;
+            this.project = project,
+            this._status = 'incomplete'
+            
         }
         projectSelect(projectSelected){
             projectSelected.push(this);
