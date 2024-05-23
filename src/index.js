@@ -1,43 +1,25 @@
-import toDos from './todo';
+import toDos from './toDos'
+import project from './project'
 
-const toDoClass = toDos()
-const allProjects = [];
-const defaultProject = ['DEFAULT'];
-allProjects.push(defaultProject)
-
-const task1 = new toDoClass('Comprar leche', 'Ir al supermercado y comprar leche', '2024-05-22', 'alta');
-const task2 = new toDoClass('Comprar leche', 'Ir al supermercado y HAHAHAHAHHAHA comprar leche', '2024-05-22', 'alta');
-task1.completeStatus = 'completed';
-
-
-console.log(task1)
-
-function createProject(name) {
-    if (typeof name === 'string') {
-        const project = [];
-        project.push(name.toUpperCase());
-        allProjects.push(project)
-    } else {
-        throw ERROR = 'NO ES UN NOMBRE VALIDO PA'
-    }  
-}
-function deleteProject(name) {
-    const asdasdad = allProjects.findIndex((project) => {
-        return project[0] === name;
-        
-    })
-    allProjects.splice(asdasdad, 1)
-
-}
-
-
-
-
+const { ToDo, createTodo } = toDos()
+const { allProjects, createDefaultProject, createProject, deleteProject } = project()
+createDefaultProject();
 console.log(allProjects)
+const sidebar = document.getElementById('sidebar');
+const tasksSection = document.getElementById('tasks');
 
-/* allprojects = [[todo = {project: x}], [todo = {project: y}], [todo = {project: z}] ]
 
-como hago para que cada project tenga su identificador?
+const addTaskButton = document.createElement('button');
 
-elemento en indice 0 siempre = nombre del proyecto?*/
+addTaskButton.addEventListener('click', (e) => {
+    e.preventDefault()
+    const newTask = createTodo('asd', 'asd', 'asd', 'asd');
+    const selectedProject = newTask._project
+    const projectIndex = allProjects.findIndex( el => el[0] === selectedProject);
+    newTask.projectSelect(allProjects[projectIndex]);
+    console.log(allProjects)
+    
 
+})
+
+tasksSection.appendChild(addTaskButton)

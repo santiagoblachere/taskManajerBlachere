@@ -1,12 +1,12 @@
 export default function toDos(){
-    class toDo {
+    class ToDo {
         
         constructor(title, description, dueDate, priority, project = 'defaultProject') {
             this.title = title,
             this.description = description,
             this.dueDate = dueDate,
             this.priority = priority,
-            this.project = project,
+            this._project = project,
             this._status = 'incomplete'
             
         }
@@ -34,5 +34,9 @@ export default function toDos(){
         }
  
     }
-    return toDo
+    function createTodo(title, description, dueDate, priority, project) {
+        const task = new ToDo(title, description, dueDate, priority, project);
+        return task;
+    }
+    return { ToDo, createTodo }
 }
