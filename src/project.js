@@ -3,7 +3,7 @@ export default function project(){
     const allProjects = [];
     function createDefaultProject(){
         
-        const defaultProject = ['defaultProject'];
+        const defaultProject = ['defaultproject'];
         allProjects.push(defaultProject)
         return allProjects 
     }
