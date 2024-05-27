@@ -7,14 +7,10 @@ format(new Date(2014, 1, 11), "MM/dd/yyyy");
 const { ToDo, createTodo } = toDos()
 const { allProjects, createDefaultProject, createProject, deleteProject } = project()
 createDefaultProject();
-console.log(allProjects)
-const sidebar = document.getElementById('sidebar');
 const tasksSection = document.getElementById('tasks');
-/* FORM */
 
-
+/* TASKS FORM            */
 const taskForm = document.createElement('form');
-
 // title
 const titleLabel = document.createElement('label');
 titleLabel.textContent = 'Title: ';
@@ -70,21 +66,28 @@ projectLabel.textContent = 'Project: ';
 const projectSelect = document.createElement('select');
 projectSelect.name = 'project';
 projectSelect.id = 'project'
-allProjects.forEach(project => {
-    const option = document.createElement('option');
-    option.value = project[0].toLowerCase().replace(/\s+/g, '-');
-    option.textContent = project;
-    projectSelect.appendChild(option);
-});
+function createProjectsOptions(){
+    projectSelect.innerHTML = ''
+    allProjects.forEach(project => {
+        const option = document.createElement('option');
+        option.value = project[0].toLowerCase().replace(/\s+/g, '-');
+        console.log(project[0] === 'defaultproject')
+        if (project[0] === 'defaultproject') {
+            option.textContent = 'NONE'
+            projectSelect.appendChild(option);
+        } else {
+            option.textContent = project[0];
+            projectSelect.appendChild(option);
+        }
+        
+    });
+}
+createProjectsOptions()
 taskForm.appendChild(projectLabel);
 taskForm.appendChild(projectSelect);
 taskForm.appendChild(document.createElement('br'));
 
-
-
 tasksSection.appendChild(taskForm)
-
-
 
 const addTaskButton = document.createElement('button');
 addTaskButton.setAttribute('type', 'submit')
@@ -110,10 +113,9 @@ taskForm.addEventListener('submit', (e) => {
     let project =  document.getElementById('project');
     let projectData = project.value;
     
-
-    const newTask = createTodo(titleData, descriptionData, formattedDate, priorityData, projectData);
+    const newTask = createTodo(titleData, descriptionData, formattedDate, priorityData, projectData.toUpperCase());
    
-    const projectIndex = allProjects.findIndex( el => el[0] === projectData);
+    const projectIndex = allProjects.findIndex( el => el[0] === projectData.toUpperCase());
     newTask.projectSelect(allProjects[projectIndex])
     drawToDo(newTask)
 })
@@ -145,3 +147,35 @@ function drawToDo(task) {
 
     tasksSection.appendChild(card);
 }
+
+// PROJECT section
+
+const sidebar = document.getElementById('sidebar');
+
+
+const createProjectInput = document.createElement('input');
+createProjectInput.type = 'text';
+createProjectInput.name = 'newProject';
+createProjectInput.id = 'newProject';
+
+
+const createProjectLabel = document.createElement('label');
+createProjectLabel.textContent = 'new project';
+createProjectLabel.setAttribute('for', 'newProject')
+
+const createProjectButton = document.createElement('button');
+createProjectButton.textContent = 'ADD';
+
+createProjectButton.addEventListener('click', () => {
+    let projectName = document.getElementById('newProject');
+    let projectNameData = projectName.value;
+    createProject(projectNameData)
+    createProjectsOptions()
+})
+
+
+
+
+sidebar.appendChild(createProjectLabel)
+sidebar.appendChild(createProjectInput)
+sidebar.appendChild(createProjectButton)

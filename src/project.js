@@ -7,8 +7,6 @@ export default function project(){
         allProjects.push(defaultProject)
         return allProjects 
     }
-    
-
     function createProject(name) {
         if (typeof name === 'string') {
             const project = [];

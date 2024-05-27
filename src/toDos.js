@@ -11,8 +11,10 @@ export default function toDos(){
             
         }
         projectSelect(projectSelected){
-            projectSelected.push(this);
+            console.log(this)
             
+            projectSelected.push(this);
+
         }
         deleteTask(projectSelected){
             const toDoIndex = projectSelected.indexOf(this);
