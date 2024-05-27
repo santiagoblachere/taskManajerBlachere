@@ -111,41 +111,47 @@ taskForm.addEventListener('submit', (e) => {
     let priorityData = priority.value;
 
     let project =  document.getElementById('project');
-    let projectData = project.value;
+    let projectData = project.value.toUpperCase();
     
-    const newTask = createTodo(titleData, descriptionData, formattedDate, priorityData, projectData.toUpperCase());
-   
-    const projectIndex = allProjects.findIndex( el => el[0] === projectData.toUpperCase());
-    newTask.projectSelect(allProjects[projectIndex])
-    drawToDo(newTask)
+    const newTask = createTodo(titleData, descriptionData, formattedDate, priorityData, projectData);
+
+    const projectIndex = allProjects.findIndex( proyect => proyect[0].toUpperCase() === projectData.toUpperCase());
+    
+    newTask.projectSelect(allProjects[projectIndex])    
 })
+const cardContainer = document.createElement('div');
+tasksSection.appendChild(cardContainer)
+function drawToDos(project) {
+    cardContainer.innerHTML = ''
+    project.forEach(task => {
+        if (task === project[0]){
+            return
+        }
+        const card = document.createElement('div');
+        card.className = 'todo-card';
 
-function drawToDo(task) {
-    
-    const card = document.createElement('div');
-    card.className = 'todo-card';
+        const titleElement = document.createElement('h2');
+        titleElement.textContent = task.title;
+        card.appendChild(titleElement);
 
-    const titleElement = document.createElement('h2');
-    titleElement.textContent = task.title;
-    card.appendChild(titleElement);
+        const descriptionElement = document.createElement('p');
+        descriptionElement.textContent = task.description;
+        card.appendChild(descriptionElement);
 
-    const descriptionElement = document.createElement('p');
-    descriptionElement.textContent = task.description;
-    card.appendChild(descriptionElement);
+        const dueDateElement = document.createElement('p');
+        dueDateElement.textContent = `Due Date: ${task.dueDate}`;
+        card.appendChild(dueDateElement);
 
-    const dueDateElement = document.createElement('p');
-    dueDateElement.textContent = `Due Date: ${task.dueDate}`;
-    card.appendChild(dueDateElement);
+        const priorityElement = document.createElement('p');
+        priorityElement.textContent = `Priority: ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}`;
+        card.appendChild(priorityElement);
 
-    const priorityElement = document.createElement('p');
-    priorityElement.textContent = `Priority: ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}`;
-    card.appendChild(priorityElement);
+        const projectElement = document.createElement('p');
+        projectElement.textContent = `Project: ${task.project.charAt(0).toUpperCase() + task.project.slice(1)}`;
+        card.appendChild(projectElement);
 
-    const projectElement = document.createElement('p');
-    projectElement.textContent = `Project: ${task.project.charAt(0).toUpperCase() + task.project.slice(1)}`;
-    card.appendChild(projectElement);
-
-    tasksSection.appendChild(card);
+        cardContainer.appendChild(card);
+    }) 
 }
 
 // PROJECT section
@@ -171,11 +177,33 @@ createProjectButton.addEventListener('click', () => {
     let projectNameData = projectName.value;
     createProject(projectNameData)
     createProjectsOptions()
+    createNavSection()
 })
-
-
-
 
 sidebar.appendChild(createProjectLabel)
 sidebar.appendChild(createProjectInput)
 sidebar.appendChild(createProjectButton)
+
+const nav = document.createElement('nav');
+sidebar.appendChild(nav)
+function createNavSection(){
+    nav.innerHTML = ''
+    allProjects.forEach(project => {
+         const projectNavButton = document.createElement('button');
+         projectNavButton.textContent = project[0];
+         projectNavButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log(project.length < 1)
+            if (project.length <= 1 ){
+                return
+            } else {
+                drawToDos(project);
+            }
+             
+         });
+         nav.appendChild(projectNavButton);
+     });
+}
+createNavSection()
+
+

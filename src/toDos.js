@@ -12,7 +12,7 @@ export default function toDos(){
         }
         projectSelect(projectSelected){
             console.log(this)
-            
+            console.log(projectSelected)
             projectSelected.push(this);
 
         }
