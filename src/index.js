@@ -8,6 +8,9 @@ const { ToDo, createTodo } = toDos()
 const { allProjects, createDefaultProject, createProject, deleteProject } = project()
 createDefaultProject();
 const tasksSection = document.getElementById('tasks');
+let allTasks = [];
+let tasksJson = localStorage.getItem('tasks') || [];
+console.log(tasksJson)
 
 /* TASKS FORM            */
 const taskForm = document.createElement('form');
@@ -79,7 +82,6 @@ function createProjectsOptions(){
             option.textContent = project[0];
             projectSelect.appendChild(option);
         }
-        
     });
 }
 createProjectsOptions()
@@ -117,10 +119,28 @@ taskForm.addEventListener('submit', (e) => {
 
     const projectIndex = allProjects.findIndex( proyect => proyect[0].toUpperCase() === projectData.toUpperCase());
     
-    newTask.projectSelect(allProjects[projectIndex])    
+    newTask.projectSelect(allProjects[projectIndex])
+    allTasks.push(newTask)
+    const taskToLocalStorage = JSON.stringify(allTasks);
+    localStorage.setItem('tasks', taskToLocalStorage);
 })
 const cardContainer = document.createElement('div');
 tasksSection.appendChild(cardContainer)
+if (tasksJson.length > 0) {
+    let tasks = JSON.parse(tasksJson);
+    
+    tasks.map((taskData) => {
+        const newTask = createTodo(taskData.title, taskData.description, taskData.dueDate, taskData.priority, taskData.project);
+        allTasks.push(newTask)
+    })
+    console.log(allTasks)
+
+    
+    allTasks.forEach((task) => {
+        const projectIndex = allProjects.findIndex( proyect => proyect[0].toUpperCase() === task.project.toUpperCase());
+        task.projectSelect(allProjects[projectIndex]);
+    })
+}
 function drawToDos(project) {
     cardContainer.innerHTML = ''
     project.forEach(task => {
@@ -149,6 +169,19 @@ function drawToDos(project) {
         const projectElement = document.createElement('p');
         projectElement.textContent = `Project: ${task.project.charAt(0).toUpperCase() + task.project.slice(1)}`;
         card.appendChild(projectElement);
+
+        const deleteTaskButton = document.createElement('button');
+        deleteTaskButton.textContent = "X";
+        deleteTaskButton.addEventListener('click', () => {
+            const projectIndex = allProjects.findIndex( project => project[0].toUpperCase() === task.project.toUpperCase());
+            task.deleteTask(allProjects[projectIndex])
+            drawToDos(allProjects[projectIndex]);
+            let indexTask = allTasks.findIndex( jsonTask => jsonTask.project === task.project);
+            allTasks.splice(indexTask, 1);
+            localStorage.setItem('tasks', JSON.stringify(allTasks));
+        })
+        card.appendChild(deleteTaskButton);
+        
 
         cardContainer.appendChild(card);
     }) 
@@ -190,12 +223,17 @@ function createNavSection(){
     nav.innerHTML = ''
     allProjects.forEach(project => {
          const projectNavButton = document.createElement('button');
-         projectNavButton.textContent = project[0];
+         if (project[0] === 'defaultproject') {
+            projectNavButton.textContent = 'NO PROJECT'
+         } else {
+            projectNavButton.textContent = project[0];
+         }
+        
          projectNavButton.addEventListener('click', (e) => {
             e.preventDefault();
             console.log(project.length < 1)
             if (project.length <= 1 ){
-                return
+                cardContainer.innerHTML = '';
             } else {
                 drawToDos(project);
             }

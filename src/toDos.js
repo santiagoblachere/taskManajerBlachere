@@ -11,7 +11,6 @@ export default function toDos(){
             
         }
         projectSelect(projectSelected){
-            console.log(this)
             console.log(projectSelected)
             projectSelected.push(this);
 
@@ -19,8 +18,6 @@ export default function toDos(){
         deleteTask(projectSelected){
             const toDoIndex = projectSelected.indexOf(this);
             projectSelected.splice(toDoIndex,1)
-            
-
         }
         get completeStatus() {
             return this._status
