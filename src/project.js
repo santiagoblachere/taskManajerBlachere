@@ -1,13 +1,7 @@
 
 export default function project(){
     const allProjects = [];
-    function createDefaultProject(){
-        
-        const defaultProject = ['defaultproject'];
-        allProjects.push(defaultProject)
-        return allProjects 
-    }
-    function createProject(name) {
+    function createProject(name) {       
         if (typeof name === 'string') {
             const project = [];
             project.push(name.toUpperCase());
@@ -24,6 +18,6 @@ export default function project(){
         allProjects.splice(projectToDeleteIndex, 1)
     }
 
-    return { allProjects, createDefaultProject, createProject, deleteProject }
+    return { allProjects, createProject, deleteProject }
 
 }
