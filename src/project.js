@@ -1,6 +1,6 @@
 
 export default function project(){
-    const allProjects = [];
+    const allProjects = [['DEFAULTPROJECT']];
     function createProject(name) {       
         if (typeof name === 'string') {
             const project = [];

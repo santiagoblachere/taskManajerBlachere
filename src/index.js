@@ -1,20 +1,20 @@
 import toDos from './toDos'
 import project from './project'
 import { compareAsc, format } from "date-fns";
-
+import './style.css';
 format(new Date(2014, 1, 11), "MM/dd/yyyy");
 
 const { ToDo, createTodo } = toDos()
-const { allProjects, createProject, deleteProject } = project()
+let { allProjects, createProject, deleteProject } = project()
 const tasksSection = document.getElementById('tasks');
 let allTasks = [];
 let tasksJson = localStorage.getItem('tasks') || [];
+console.log(tasksJson)
 function getProjectsLS(){
     let projectsJSON = localStorage.getItem('projects');
-    let parsedProjects = JSON.parse(projectsJSON) || [['defaultproject']]
-    console.log(parsedProjects)
-    if (parsedProjects.length > 0) {
-    parsedProjects.forEach( (project) => {
+    let parsedProjects = JSON.parse(projectsJSON) || [];
+    if (parsedProjects.length > 1) {
+        parsedProjects.forEach( (project) => {
         allProjects.push(project)
     })
     }
@@ -24,15 +24,18 @@ function getProjectsLS(){
 
 
 
+
 /* TASKS FORM            */
 const taskForm = document.createElement('form');
+taskForm.classList.add('asd')
 // title
 const titleLabel = document.createElement('label');
 titleLabel.textContent = 'Title: ';
 const titleInput = document.createElement('input');
 titleInput.type = 'text';
 titleInput.name = 'title';
-titleInput.id = 'title'
+titleInput.id = 'title';
+titleInput.required = 'true'
 taskForm.appendChild(titleLabel);
 taskForm.appendChild(titleInput);
 taskForm.appendChild(document.createElement('br'));
@@ -54,6 +57,7 @@ const dueDateInput = document.createElement('input');
 dueDateInput.type = 'date';
 dueDateInput.name = 'dueDate';
 dueDateInput.id = 'dueDate'
+dueDateInput.required = true
 taskForm.appendChild(dueDateLabel);
 taskForm.appendChild(dueDateInput);
 taskForm.appendChild(document.createElement('br'));
@@ -82,20 +86,19 @@ const projectSelect = document.createElement('select');
 projectSelect.name = 'project';
 projectSelect.id = 'project'
 function createProjectsOptions(){
-    projectSelect.innerHTML = ''
+    projectSelect.innerHTML = '';
     allProjects.forEach(project => {
         const option = document.createElement('option');
         option.value = project[0].toLowerCase().replace(/\s+/g, '-');
-        if (project[0] === 'defaultproject') {
+        if (project[0] === 'DEFAULTPROJECT') {
             option.textContent = 'NONE'
             projectSelect.appendChild(option);
         } else {
-            option.textContent = project[0];
+            option.textContent = project[0].toUpperCase();
             projectSelect.appendChild(option);
         }
     });
 }
-createProjectsOptions()
 taskForm.appendChild(projectLabel);
 taskForm.appendChild(projectSelect);
 taskForm.appendChild(document.createElement('br'));
@@ -132,25 +135,28 @@ taskForm.addEventListener('submit', (e) => {
     
     newTask.projectSelect(allProjects[projectIndex])
     allTasks.push(newTask)
+
     const taskToLocalStorage = JSON.stringify(allTasks);
     localStorage.setItem('tasks', taskToLocalStorage);
+    drawToDos(allProjects[projectIndex]);
 })
 const cardContainer = document.createElement('div');
 tasksSection.appendChild(cardContainer)
 if (tasksJson.length > 0) {
     let tasks = JSON.parse(tasksJson);
-    
+    let tasksWithFunctions = []
     tasks.map((taskData) => {
         const newTask = createTodo(taskData.title, taskData.description, taskData.dueDate, taskData.priority, taskData.project);
-        allTasks.push(newTask)
+        tasksWithFunctions.push(newTask)
     })
-    
-
-    
-    allTasks.forEach((task) => {
+    console.log(tasksWithFunctions)
+    tasksWithFunctions.forEach((task) => {
         const projectIndex = allProjects.findIndex( proyect => proyect[0].toUpperCase() === task.project.toUpperCase());
+        console.log(projectIndex)
         task.projectSelect(allProjects[projectIndex]);
-    })
+        
+    }); 
+    drawToDos(allProjects[0])
 }
 function drawToDos(project) {
     cardContainer.innerHTML = ''
@@ -189,6 +195,7 @@ function drawToDos(project) {
             drawToDos(allProjects[projectIndex]);
             let indexTask = allTasks.findIndex( jsonTask => jsonTask.project === task.project);
             allTasks.splice(indexTask, 1);
+            console.log(allTasks)
             localStorage.setItem('tasks', JSON.stringify(allTasks));
         })
         card.appendChild(deleteTaskButton);
@@ -220,8 +227,10 @@ createProjectButton.addEventListener('click', () => {
     let projectName = document.getElementById('newProject');
     let projectNameData = projectName.value;
     createProject(projectNameData)
+    console.log(allProjects)
     createProjectsOptions()
     createNavSection()
+    console.log(allProjects)
     localStorage.setItem('projects', JSON.stringify(allProjects));
 })
 
@@ -234,10 +243,22 @@ sidebar.appendChild(nav)
 function createNavSection(){
     nav.innerHTML = ''
     allProjects.forEach(project => {
+         const navProjectContainer = document.createElement('div')
+         const deleteProjectButton = document.createElement('button');
          const projectNavButton = document.createElement('button');
          projectNavButton.classList.add('projectNavButton');
-         if (project[0] === 'defaultproject') {
-            projectNavButton.textContent = 'NO PROJECT'
+         navProjectContainer.appendChild(projectNavButton)
+         navProjectContainer.appendChild(deleteProjectButton)
+         
+         deleteProjectButton.addEventListener('click', () => {  
+            deleteProject(project[0]);
+            localStorage.setItem('projects', JSON.stringify(allProjects));
+            navProjectContainer.innerHTML = "";
+         })
+
+         if (project[0] === 'DEFAULTPROJECT') {
+            projectNavButton.textContent = 'NO PROJECT';
+            navProjectContainer.removeChild(deleteProjectButton)
          } else {
             projectNavButton.textContent = project[0];
          }
@@ -249,10 +270,11 @@ function createNavSection(){
                 drawToDos(project);
             }
          });
-         nav.appendChild(projectNavButton);
+
+         nav.appendChild(navProjectContainer);
      });
 }
+
+
 getProjectsLS()
-
-
 
