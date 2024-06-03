@@ -1,3 +1,137 @@
-.asd {
-    color: red;
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    height: 100vh;
+    background: #fff;
+    color: #000;
+}
+
+#sidebar {
+    width: 250px;
+    background: #eee;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#sidebar label, #sidebar button, #sidebar input {
+    width: calc(100% - 40px);
+    margin-bottom: 10px;
+}
+
+#sidebar button {
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+
+#sidebar button:hover {
+    background: #333;
+}
+
+#tasks {
+    flex: 1;
+    padding: 20px;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+form label, form input, form textarea, form select, form button {
+    display: block;
+    width: calc(100% - 40px);
+    margin-bottom: 5px;
+    border: 1px solid #000;
+    padding: 5px;
+    box-sizing: border-box; 
+    background: #fff;
+}
+
+form textarea {
+    resize: vertical;
+    height: 60px;
+}
+
+form button {
+    background: #000;
+    color: #fff;
+    cursor: pointer;
+    padding: 5px;
+}
+
+form button:hover {
+    background: #333;
+}
+
+#cardContainer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.todo-card {
+    border: 2px solid #000;
+    padding: 20px;
+    background: #fff;
+}
+
+.todo-card h2 {
+    margin-top: 0;
+    font-size: 1.5em;
+}
+
+.todo-card p {
+    margin: 10px 0;
+}
+
+.todo-card button {
+    background: #f00;
+    color: #fff;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.todo-card button:hover {
+    background: #a00;
+}
+
+nav div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+nav button {
+    background: #f00;
+    color: #fff;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+}
+
+nav button:hover {
+    background: #a00;
+}
+
+.projectNavButton {
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    width: calc(100% - 30px);
+    text-align: left;
+}
+
+.projectNavButton:hover {
+    background: #333;
 }

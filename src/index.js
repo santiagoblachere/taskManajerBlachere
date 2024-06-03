@@ -1,169 +1,65 @@
-import toDos from './toDos'
-import project from './project'
+import toDos from './toDos';
+import project from './project';
 import { compareAsc, format } from "date-fns";
 import './style.css';
-format(new Date(2014, 1, 11), "MM/dd/yyyy");
 
-const { ToDo, createTodo } = toDos()
-let { allProjects, createProject, deleteProject } = project()
+const { ToDo, createTodo } = toDos();
+let { allProjects, createProject, deleteProject } = project();
 const tasksSection = document.getElementById('tasks');
 let allTasks = [];
-let tasksJson = localStorage.getItem('tasks') || [];
+const DEFAULT_PROJECT = 'DEFAULTPROJECT';
 
 // LOCAL STORAGE PROJECTS
-function getProjectsLS(){
+function getProjectsLS() {
     let projectsJSON = localStorage.getItem('projects');
-    let parsedProjects = JSON.parse(projectsJSON)
-    allProjects = [...parsedProjects];
-    allProjects[0] = ['DEFAULTPROJECT'];
-    console.log(allProjects)
+    let parsedProjects = JSON.parse(projectsJSON) || [[DEFAULT_PROJECT]];
+    allProjects = parsedProjects;
 }
 
+function setProjectLS(projects) {
+    let JSONprojects = JSON.stringify(projects);
+    localStorage.setItem('projects', JSONprojects);
+}
 
+function getTasksLS() {
+    let tasksJSON = localStorage.getItem('tasks');
+    let parsedTasks = JSON.parse(tasksJSON) || [];
+    allTasks = parsedTasks.map((taskData) => {
+        return createTodo(
+            taskData.title,
+            taskData.description,
+            taskData.dueDate,
+            taskData.priority,
+            taskData.project
+        );
+    });
 
+    allTasks.forEach((task) => {
+        if (task.project) {
+            let projectIndex = allProjects.findIndex(project => project[0].toUpperCase() === task.project.toUpperCase());
+            if (projectIndex !== -1) {
+                task.projectSelect(allProjects[projectIndex]);
+            }
+        }
+    });
+}
 
+getProjectsLS();
+getTasksLS();
 
-/* TASKS FORM            */
-const taskForm = document.createElement('form');
-taskForm.classList.add('asd')
-// title
-const titleLabel = document.createElement('label');
-titleLabel.textContent = 'Title: ';
-const titleInput = document.createElement('input');
-titleInput.type = 'text';
-titleInput.name = 'title';
-titleInput.id = 'title';
-titleInput.required = 'true'
-taskForm.appendChild(titleLabel);
-taskForm.appendChild(titleInput);
-taskForm.appendChild(document.createElement('br'));
-
-// description
-const descriptionLabel = document.createElement('label');
-descriptionLabel.textContent = 'Description: ';
-const descriptionInput = document.createElement('textarea');
-descriptionInput.name = 'description';
-descriptionInput.id = 'description'
-taskForm.appendChild(descriptionLabel);
-taskForm.appendChild(descriptionInput);
-taskForm.appendChild(document.createElement('br'));
-
-// due Date
-const dueDateLabel = document.createElement('label');
-dueDateLabel.textContent = 'Due Date: ';
-const dueDateInput = document.createElement('input');
-dueDateInput.type = 'date';
-dueDateInput.name = 'dueDate';
-dueDateInput.id = 'dueDate'
-dueDateInput.required = true
-taskForm.appendChild(dueDateLabel);
-taskForm.appendChild(dueDateInput);
-taskForm.appendChild(document.createElement('br'));
-
-// priority
-const priorityLabel = document.createElement('label');
-priorityLabel.textContent = 'Priority: ';
-const prioritySelect = document.createElement('select');
-prioritySelect.name = 'priority';
-prioritySelect.id = 'priority';
-['High', 'Medium', 'Low'].forEach(level => {
-    const option = document.createElement('option');
-    option.value = level.toLowerCase();
-    option.textContent = level;
-    prioritySelect.appendChild(option);
-});
-taskForm.appendChild(priorityLabel);
-taskForm.appendChild(prioritySelect);
-taskForm.appendChild(document.createElement('br'));
-
-// project
-
-const projectLabel = document.createElement('label');
-projectLabel.textContent = 'Project: ';
-const projectSelect = document.createElement('select');
-projectSelect.name = 'project';
-projectSelect.id = 'project'
-function createProjectsOptions(){
-
+function createProjectsOptions() {
     projectSelect.innerHTML = '';
     allProjects.forEach(project => {
         const option = document.createElement('option');
         option.value = project[0].toLowerCase().replace(/\s+/g, '-');
-        if (project[0] === 'DEFAULTPROJECT') {
-            option.textContent = 'NONE'
-            projectSelect.appendChild(option);
-        } else {
-            option.textContent = project[0].toUpperCase();
-            projectSelect.appendChild(option);
-        }
+        option.textContent = project[0] === DEFAULT_PROJECT ? 'NONE' : project[0].toUpperCase();
+        projectSelect.appendChild(option);
     });
 }
-taskForm.appendChild(projectLabel);
-taskForm.appendChild(projectSelect);
-taskForm.appendChild(document.createElement('br'));
 
-tasksSection.appendChild(taskForm)
-
-const addTaskButton = document.createElement('button');
-addTaskButton.setAttribute('type', 'submit')
-addTaskButton.innerText = 'ADD TASK';
-
-taskForm.appendChild(addTaskButton)
-
-taskForm.addEventListener('submit', (e) => {
-    e.preventDefault()
-    let title = document.getElementById('title');
-    let titleData = title.value;
-
-    let description = document.getElementById('description');
-    let descriptionData = description.value;
-
-    let dueDate = document.getElementById('dueDate');
-    let dueDateChosen = new Date(dueDate.value);
-    const formattedDate = format(dueDateChosen, 'MM/dd/yyyy');
-
-    let priority = document.getElementById('priority')
-    let priorityData = priority.value;
-
-    let project =  document.getElementById('project');
-    let projectData = project.value.toUpperCase();
-    
-    const newTask = createTodo(titleData, descriptionData, formattedDate, priorityData, projectData);
-
-    const projectIndex = allProjects.findIndex( proyect => proyect[0].toUpperCase() === projectData.toUpperCase());
-
-    newTask.projectSelect(allProjects[projectIndex])
-    allTasks.push(newTask)
-
-    const taskToLocalStorage = JSON.stringify(allTasks);
-    localStorage.setItem('tasks', taskToLocalStorage);
-    drawToDos(allProjects[projectIndex]);
-})
-const cardContainer = document.createElement('div');
-tasksSection.appendChild(cardContainer)
-if (tasksJson.length > 0) {
-    getProjectsLS()
-    let tasks = JSON.parse(tasksJson);
-    console.log(tasks)
-    let tasksWithFunctions = []
-    tasks.map((taskData) => {
-        const newTask = createTodo(taskData.title, taskData.description, taskData.dueDate, taskData.priority, taskData.project);
-        tasksWithFunctions.push(newTask)
-    })
-    console.log(tasksWithFunctions)
-    tasksWithFunctions.forEach((task) => {
-        const projectIndex = allProjects.findIndex( project => project[0].toUpperCase() === task.project.toUpperCase());
-        task.projectSelect(allProjects[projectIndex]);  
-    }); 
-    drawToDos(allProjects[0])
-}
 function drawToDos(project) {
-    console.log(project);
-    cardContainer.innerHTML = ''
-    project.forEach(task => {
-        if (task === project[0]){
-            return
-        }
+    cardContainer.innerHTML = '';
+    project.slice(1).forEach(task => {
         const card = document.createElement('div');
         card.className = 'todo-card';
 
@@ -180,104 +76,200 @@ function drawToDos(project) {
         card.appendChild(dueDateElement);
 
         const priorityElement = document.createElement('p');
-        priorityElement.textContent = `Priority: ${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}`;
+        priorityElement.textContent = `Priority: ${task.priority ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) : 'N/A'}`;
         card.appendChild(priorityElement);
 
         const projectElement = document.createElement('p');
-        projectElement.textContent = `Project: ${task.project.charAt(0).toUpperCase() + task.project.slice(1)}`;
+        projectElement.textContent = `Project: ${task.project ? task.project.charAt(0).toUpperCase() + task.project.slice(1) : 'N/A'}`;
         card.appendChild(projectElement);
 
         const deleteTaskButton = document.createElement('button');
         deleteTaskButton.textContent = "X";
         deleteTaskButton.addEventListener('click', () => {
-            const projectIndex = allProjects.findIndex( project => project[0].toUpperCase() === task.project.toUpperCase());
-            task.deleteTask(allProjects[projectIndex])
-            drawToDos(allProjects[projectIndex]);
-            let indexTask = allTasks.findIndex( jsonTask => jsonTask.project === task.project);
-            allTasks.splice(indexTask, 1);
-            
-            localStorage.setItem('tasks', JSON.stringify(allTasks));
-        })
+            if (task.project) {
+                const projectIndex = allProjects.findIndex(proj => proj[0].toUpperCase() === task.project.toUpperCase());
+                if (projectIndex !== -1) {
+                    task.deleteTask(allProjects[projectIndex]);
+                    drawToDos(allProjects[projectIndex]);
+                    allTasks = allTasks.filter(t => t.project !== task.project || t.title !== task.title);
+                    localStorage.setItem('tasks', JSON.stringify(allTasks));
+                }
+            }
+        });
         card.appendChild(deleteTaskButton);
-        
 
         cardContainer.appendChild(card);
-    }) 
+    });
 }
 
+// TASKS FORM
+const taskForm = document.createElement('form');
+taskForm.classList.add('task-form');
+
+// Title
+const titleLabel = document.createElement('label');
+titleLabel.textContent = 'Title: ';
+const titleInput = document.createElement('input');
+titleInput.type = 'text';
+titleInput.name = 'title';
+titleInput.id = 'title';
+titleInput.required = true;
+taskForm.appendChild(titleLabel);
+taskForm.appendChild(titleInput);
+taskForm.appendChild(document.createElement('br'));
+
+// Description
+const descriptionLabel = document.createElement('label');
+descriptionLabel.textContent = 'Description: ';
+const descriptionInput = document.createElement('textarea');
+descriptionInput.name = 'description';
+descriptionInput.id = 'description';
+taskForm.appendChild(descriptionLabel);
+taskForm.appendChild(descriptionInput);
+taskForm.appendChild(document.createElement('br'));
+
+// Due Date
+const dueDateLabel = document.createElement('label');
+dueDateLabel.textContent = 'Due Date: ';
+const dueDateInput = document.createElement('input');
+dueDateInput.type = 'date';
+dueDateInput.name = 'dueDate';
+dueDateInput.id = 'dueDate';
+dueDateInput.required = true;
+taskForm.appendChild(dueDateLabel);
+taskForm.appendChild(dueDateInput);
+taskForm.appendChild(document.createElement('br'));
+
+// Priority
+const priorityLabel = document.createElement('label');
+priorityLabel.textContent = 'Priority: ';
+const prioritySelect = document.createElement('select');
+prioritySelect.name = 'priority';
+prioritySelect.id = 'priority';
+['High', 'Medium', 'Low'].forEach(level => {
+    const option = document.createElement('option');
+    option.value = level.toLowerCase();
+    option.textContent = level;
+    prioritySelect.appendChild(option);
+});
+taskForm.appendChild(priorityLabel);
+taskForm.appendChild(prioritySelect);
+taskForm.appendChild(document.createElement('br'));
+
+// Project
+const projectLabel = document.createElement('label');
+projectLabel.textContent = 'Project: ';
+const projectSelect = document.createElement('select');
+projectSelect.name = 'project';
+projectSelect.id = 'project';
+createProjectsOptions();
+taskForm.appendChild(projectLabel);
+taskForm.appendChild(projectSelect);
+taskForm.appendChild(document.createElement('br'));
+
+tasksSection.appendChild(taskForm);
+
+const addTaskButton = document.createElement('button');
+addTaskButton.setAttribute('type', 'submit');
+addTaskButton.innerText = 'ADD TASK';
+taskForm.appendChild(addTaskButton);
+
+taskForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById('title').value;
+    const description = document.getElementById('description').value;
+    const dueDate = document.getElementById('dueDate').value;
+    const priority = document.getElementById('priority').value;
+    const project = document.getElementById('project').value.toUpperCase();
+    
+    const formattedDate = format(new Date(dueDate), 'MM/dd/yyyy');
+    const newTask = createTodo(
+        title,
+        description,
+        formattedDate,
+        priority,
+        project
+    );
+
+    const projectIndex = allProjects.findIndex(proj => proj[0].toUpperCase() === project);
+    if (projectIndex !== -1) {
+        newTask.projectSelect(allProjects[projectIndex]);
+        allTasks.push(newTask);
+
+        localStorage.setItem('tasks', JSON.stringify(allTasks));
+        drawToDos(allProjects[projectIndex]);
+    }
+});
+
+const cardContainer = document.createElement('div');
+cardContainer.id = 'cardContainer';
+tasksSection.appendChild(cardContainer);
+
 // PROJECT section
-
 const sidebar = document.getElementById('sidebar');
-
 
 const createProjectInput = document.createElement('input');
 createProjectInput.type = 'text';
 createProjectInput.name = 'newProject';
 createProjectInput.id = 'newProject';
 
-
 const createProjectLabel = document.createElement('label');
-createProjectLabel.textContent = 'new project';
-createProjectLabel.setAttribute('for', 'newProject')
+createProjectLabel.textContent = 'New Project';
+createProjectLabel.setAttribute('for', 'newProject');
 
 const createProjectButton = document.createElement('button');
 createProjectButton.textContent = 'ADD';
 
 createProjectButton.addEventListener('click', (e) => {
-    e.preventDefault()
-    let projectName = document.getElementById('newProject');
-    let projectNameData = projectName.value;
-    createProject(projectNameData, allProjects);
-    let projectsJSON = JSON.stringify(allProjects)
-    localStorage.setItem('projects', projectsJSON);
-    
-    createProjectsOptions()
-    createNavSection()
-    
-})
+    e.preventDefault();
+    const projectName = document.getElementById('newProject').value;
+    createProject(projectName, allProjects);
+    setProjectLS(allProjects);
+    createProjectsOptions();
+    createNavSection();
+});
 
-sidebar.appendChild(createProjectLabel)
-sidebar.appendChild(createProjectInput)
-sidebar.appendChild(createProjectButton)
+sidebar.appendChild(createProjectLabel);
+sidebar.appendChild(createProjectInput);
+sidebar.appendChild(createProjectButton);
 
 const nav = document.createElement('nav');
-sidebar.appendChild(nav)
-function createNavSection(){
+sidebar.appendChild(nav);
+
+function createNavSection() {
     getProjectsLS();
-    nav.innerHTML = ''
+    nav.innerHTML = '';
     allProjects.forEach(project => {
-         const navProjectContainer = document.createElement('div')
-         const deleteProjectButton = document.createElement('button');
-         const projectNavButton = document.createElement('button');
-         projectNavButton.classList.add('projectNavButton');
-         navProjectContainer.appendChild(projectNavButton)
-         navProjectContainer.appendChild(deleteProjectButton)
-         
-         deleteProjectButton.addEventListener('click', () => {  
+        const navProjectContainer = document.createElement('div');
+        const deleteProjectButton = document.createElement('button');
+        const projectNavButton = document.createElement('button');
+        projectNavButton.classList.add('projectNavButton');
+        navProjectContainer.appendChild(projectNavButton);
+        navProjectContainer.appendChild(deleteProjectButton);
+
+        deleteProjectButton.addEventListener('click', () => {
             deleteProject(project[0], allProjects);
-            localStorage.setItem('projects', JSON.stringify(allProjects));
-            navProjectContainer.innerHTML = "";
-         })
+            setProjectLS(allProjects);
+            createProjectsOptions();
+            createNavSection();
+        });
 
-         if (project[0] === 'DEFAULTPROJECT') {
+        if (project[0] === DEFAULT_PROJECT) {
             projectNavButton.textContent = 'NO PROJECT';
-            navProjectContainer.removeChild(deleteProjectButton)
-         } else {
+            navProjectContainer.removeChild(deleteProjectButton);
+        } else {
             projectNavButton.textContent = project[0];
-         }
-         projectNavButton.addEventListener('click', (e) => {
+        }
+
+        projectNavButton.addEventListener('click', (e) => {
             e.preventDefault();
-            if (project.length <= 1 ){
-                cardContainer.innerHTML = '';
-            } else {
-                drawToDos(project);
-            }
-         });
-         nav.appendChild(navProjectContainer);
-     });
+            drawToDos(project);
+        });
+
+        nav.appendChild(navProjectContainer);
+    });
 }
-createNavSection()
-createProjectsOptions()
 
-
-
+createNavSection();
+createProjectsOptions();

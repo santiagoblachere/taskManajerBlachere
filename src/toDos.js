@@ -11,13 +11,13 @@ export default function toDos(){
             
         }
         projectSelect(projectSelected){
-            console.log(projectSelected)
             projectSelected.push(this);
-
         }
-        deleteTask(projectSelected){
-            const toDoIndex = projectSelected.indexOf(this);
-            projectSelected.splice(toDoIndex,1)
+        deleteTask(taskProject){
+            const index = taskProject.findIndex(task => task.title === this.title && task.project === this.project);
+            if (index !== -1) {
+                taskProject.splice(index, 1);
+            }
         }
         get completeStatus() {
             return this._status
