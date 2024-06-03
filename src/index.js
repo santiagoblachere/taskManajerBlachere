@@ -9,18 +9,16 @@ let { allProjects, createProject, deleteProject } = project()
 const tasksSection = document.getElementById('tasks');
 let allTasks = [];
 let tasksJson = localStorage.getItem('tasks') || [];
-console.log(tasksJson)
+
+// LOCAL STORAGE PROJECTS
 function getProjectsLS(){
     let projectsJSON = localStorage.getItem('projects');
-    let parsedProjects = JSON.parse(projectsJSON) || [];
-    if (parsedProjects.length > 1) {
-        parsedProjects.forEach( (project) => {
-        allProjects.push(project)
-    })
-    }
-    createNavSection();
-    createProjectsOptions();
-};
+    let parsedProjects = JSON.parse(projectsJSON)
+    allProjects = [...parsedProjects];
+    allProjects[0] = ['DEFAULTPROJECT'];
+    console.log(allProjects)
+}
+
 
 
 
@@ -86,6 +84,7 @@ const projectSelect = document.createElement('select');
 projectSelect.name = 'project';
 projectSelect.id = 'project'
 function createProjectsOptions(){
+
     projectSelect.innerHTML = '';
     allProjects.forEach(project => {
         const option = document.createElement('option');
@@ -132,7 +131,7 @@ taskForm.addEventListener('submit', (e) => {
     const newTask = createTodo(titleData, descriptionData, formattedDate, priorityData, projectData);
 
     const projectIndex = allProjects.findIndex( proyect => proyect[0].toUpperCase() === projectData.toUpperCase());
-    
+
     newTask.projectSelect(allProjects[projectIndex])
     allTasks.push(newTask)
 
@@ -143,7 +142,9 @@ taskForm.addEventListener('submit', (e) => {
 const cardContainer = document.createElement('div');
 tasksSection.appendChild(cardContainer)
 if (tasksJson.length > 0) {
+    getProjectsLS()
     let tasks = JSON.parse(tasksJson);
+    console.log(tasks)
     let tasksWithFunctions = []
     tasks.map((taskData) => {
         const newTask = createTodo(taskData.title, taskData.description, taskData.dueDate, taskData.priority, taskData.project);
@@ -151,14 +152,13 @@ if (tasksJson.length > 0) {
     })
     console.log(tasksWithFunctions)
     tasksWithFunctions.forEach((task) => {
-        const projectIndex = allProjects.findIndex( proyect => proyect[0].toUpperCase() === task.project.toUpperCase());
-        console.log(projectIndex)
-        task.projectSelect(allProjects[projectIndex]);
-        
+        const projectIndex = allProjects.findIndex( project => project[0].toUpperCase() === task.project.toUpperCase());
+        task.projectSelect(allProjects[projectIndex]);  
     }); 
     drawToDos(allProjects[0])
 }
 function drawToDos(project) {
+    console.log(project);
     cardContainer.innerHTML = ''
     project.forEach(task => {
         if (task === project[0]){
@@ -195,7 +195,7 @@ function drawToDos(project) {
             drawToDos(allProjects[projectIndex]);
             let indexTask = allTasks.findIndex( jsonTask => jsonTask.project === task.project);
             allTasks.splice(indexTask, 1);
-            console.log(allTasks)
+            
             localStorage.setItem('tasks', JSON.stringify(allTasks));
         })
         card.appendChild(deleteTaskButton);
@@ -223,15 +223,17 @@ createProjectLabel.setAttribute('for', 'newProject')
 const createProjectButton = document.createElement('button');
 createProjectButton.textContent = 'ADD';
 
-createProjectButton.addEventListener('click', () => {
+createProjectButton.addEventListener('click', (e) => {
+    e.preventDefault()
     let projectName = document.getElementById('newProject');
     let projectNameData = projectName.value;
-    createProject(projectNameData)
-    console.log(allProjects)
+    createProject(projectNameData, allProjects);
+    let projectsJSON = JSON.stringify(allProjects)
+    localStorage.setItem('projects', projectsJSON);
+    
     createProjectsOptions()
     createNavSection()
-    console.log(allProjects)
-    localStorage.setItem('projects', JSON.stringify(allProjects));
+    
 })
 
 sidebar.appendChild(createProjectLabel)
@@ -241,6 +243,7 @@ sidebar.appendChild(createProjectButton)
 const nav = document.createElement('nav');
 sidebar.appendChild(nav)
 function createNavSection(){
+    getProjectsLS();
     nav.innerHTML = ''
     allProjects.forEach(project => {
          const navProjectContainer = document.createElement('div')
@@ -251,7 +254,7 @@ function createNavSection(){
          navProjectContainer.appendChild(deleteProjectButton)
          
          deleteProjectButton.addEventListener('click', () => {  
-            deleteProject(project[0]);
+            deleteProject(project[0], allProjects);
             localStorage.setItem('projects', JSON.stringify(allProjects));
             navProjectContainer.innerHTML = "";
          })
@@ -270,11 +273,11 @@ function createNavSection(){
                 drawToDos(project);
             }
          });
-
          nav.appendChild(navProjectContainer);
      });
 }
+createNavSection()
+createProjectsOptions()
 
 
-getProjectsLS()
 
