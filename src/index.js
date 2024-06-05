@@ -23,7 +23,9 @@ function setProjectLS(projects) {
 
 function getTasksLS() {
     let tasksJSON = localStorage.getItem('tasks');
+    
     let parsedTasks = JSON.parse(tasksJSON) || [];
+    console.log(parsedTasks)
     allTasks = parsedTasks.map((taskData) => {
         return createTodo(
             taskData.title,
@@ -33,7 +35,7 @@ function getTasksLS() {
             taskData.project
         );
     });
-
+    
     allTasks.forEach((task) => {
         if (task.project) {
             let projectIndex = allProjects.findIndex(project => project[0].toUpperCase() === task.project.toUpperCase());
@@ -42,10 +44,14 @@ function getTasksLS() {
             }
         }
     });
+    
+    localStorage.setItem('tasks', JSON.stringify(allTasks));
+    console.log(allProjects)
+    setProjectLS(allProjects)
 }
 
 getProjectsLS();
-getTasksLS();
+
 
 function createProjectsOptions() {
     projectSelect.innerHTML = '';
@@ -238,11 +244,12 @@ const nav = document.createElement('nav');
 sidebar.appendChild(nav);
 
 function createNavSection() {
-    getProjectsLS();
     nav.innerHTML = '';
     allProjects.forEach(project => {
         const navProjectContainer = document.createElement('div');
         const deleteProjectButton = document.createElement('button');
+        deleteProjectButton.textContent = 'X'
+        deleteProjectButton.classList.add('deleteProjectButton')
         const projectNavButton = document.createElement('button');
         projectNavButton.classList.add('projectNavButton');
         navProjectContainer.appendChild(projectNavButton);
@@ -264,6 +271,7 @@ function createNavSection() {
 
         projectNavButton.addEventListener('click', (e) => {
             e.preventDefault();
+            console.log(project)
             drawToDos(project);
         });
 
