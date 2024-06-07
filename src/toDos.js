@@ -10,8 +10,10 @@ export default function toDos(){
             this._status = 'incomplete'
             
         }
-        projectSelect(projectSelected){
-            projectSelected.push(this);
+        projectSelect(projectSelected) {
+            if (!projectSelected.some(task => task.title === this.title && task.description === this.description)) {
+                projectSelected.push(this);
+            }
         }
         deleteTask(taskProject){
             const index = taskProject.findIndex(task => task.title === this.title && task.project === this.project);
